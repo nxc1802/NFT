@@ -12,6 +12,7 @@ mongo_url = "mongodb+srv://ip6ofme:JL1S4hjMWRoko8AJ@cluster0.x0vo0.mongodb.net/"
 client = pymongo.MongoClient(mongo_url)
 db = client["test"]
 pdf_collection = db["PdfDetails"]
+voter_collection = db["Voters"]
 
 # API để upload file và lưu thông tin vào MongoDB
 @app.route('/upload-files', methods=['POST'])
@@ -76,6 +77,57 @@ def get_files():
         return jsonify({'status': 'ok', 'data': file_list})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# API mới để đăng ký người bình chọn
+@app.route('/register-voter', methods=['POST'])
+def register_voter():
+    data = request.json
+    name = data.get('name')
+    group = data.get('group')
+    
+    new_voter = {
+        'name': name,
+        'group': group,
+        'number_of_votes': 0
+    }
+    result = voter_collection.insert_one(new_voter)
+    return jsonify({'status': 'ok', 'id': str(result.inserted_id)})
+
+# API mới để bình chọn
+@app.route('/vote-by-voter', methods=['POST'])
+def vote_by_voter():
+    data = request.json
+    voter_id = data.get('voter_id')
+    file_id = data.get('file_id')
+    
+    voter = voter_collection.find_one({'_id': ObjectId(voter_id)})
+    if not voter:
+        return jsonify({'status': 'error', 'message': 'Voter not found'}), 404
+    
+    if voter['number_of_votes'] >= 5:
+        return jsonify({'status': 'error', 'message': 'Maximum votes reached'}), 400
+    
+    # Tăng số lượt bình chọn của người dùng
+    voter_collection.update_one({'_id': ObjectId(voter_id)}, {'$inc': {'number_of_votes': 1}})
+    
+    # Tăng số lượt bình chọn cho file
+    pdf_collection.update_one({'_id': ObjectId(file_id)}, {'$inc': {'votes': 1}})
+    
+    return jsonify({'status': 'ok', 'message': 'Vote recorded successfully'})
+
+# API để lấy thông tin người bình chọn
+@app.route('/get-voter', methods=['GET'])
+def get_voter():
+    voter_id = request.args.get('id')
+    voter = voter_collection.find_one({'_id': ObjectId(voter_id)})
+    if not voter:
+        return jsonify({'status': 'error', 'message': 'Voter not found'}), 404
+    return jsonify({
+        'status': 'ok',
+        'name': voter['name'],
+        'group': voter['group'],
+        'number_of_votes': voter['number_of_votes']
+    })
 
 # Khởi chạy server
 if __name__ == "__main__":
