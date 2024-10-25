@@ -47,8 +47,13 @@ if uploaded_file is not None:
 
         # Kiểm tra phản hồi từ server MongoDB
         if mongo_response.status_code == 200:
-            st.success("File information uploaded to MongoDB successfully!")
-            mongo_result = mongo_response.json()
-            st.write("MongoDB File ID:", mongo_result.get("id"))
+            try:
+                mongo_result = mongo_response.json()
+                st.success("File information uploaded to MongoDB successfully!")
+                st.write("MongoDB File ID:", mongo_result.get("id"))
+            except requests.exceptions.JSONDecodeError:
+                st.error(f"MongoDB upload failed: Invalid JSON response")
+                st.write("Response content:", mongo_response.text)
         else:
-            st.error(f"MongoDB upload failed: {mongo_response.json().get('status')}")
+            st.error(f"MongoDB upload failed with status code: {mongo_response.status_code}")
+            st.write("Response content:", mongo_response.text)
