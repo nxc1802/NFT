@@ -3,10 +3,11 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-BASE_URL = "http://localhost:5000"
+# Cập nhật URL của API
+API_URL = "https://mantea-mongodbnft.hf.space"
 
 def register_voter(name, group):
-    response = requests.post(f"{BASE_URL}/register-voter", json={"name": name, "group": group})
+    response = requests.post(f"{API_URL}/register-voter", json={"name": name, "group": group})
     if response.status_code == 200:
         return response.json()['id']
     else:
@@ -14,14 +15,14 @@ def register_voter(name, group):
         return None
 
 def vote_for_file(voter_id, file_id):
-    response = requests.post(f"{BASE_URL}/vote-by-voter", json={"voter_id": voter_id, "file_id": file_id})
+    response = requests.post(f"{API_URL}/vote-by-voter", json={"voter_id": voter_id, "file_id": file_id})
     if response.status_code == 200:
         st.success("Bình chọn thành công!")
     else:
         st.error(f"Không thể bình chọn: {response.json().get('message')}")
 
 def get_voter_info(voter_id):
-    response = requests.get(f"{BASE_URL}/get-voter?id={voter_id}")
+    response = requests.get(f"{API_URL}/get-voter?id={voter_id}")
     if response.status_code == 200:
         return response.json()
     else:
@@ -29,7 +30,7 @@ def get_voter_info(voter_id):
         return None
 
 def get_files():
-    response = requests.get(f"{BASE_URL}/get-files")
+    response = requests.get(f"{API_URL}/get-files")
     if response.status_code == 200:
         return response.json()['data']
     else:

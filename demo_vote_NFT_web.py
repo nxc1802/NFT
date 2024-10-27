@@ -3,9 +3,12 @@ import requests
 from PIL import Image
 from io import BytesIO
 
+# Cập nhật URL của API
+API_URL = "https://mantea-mongodbnft.hf.space"
+
 # Hàm để lấy danh sách các file từ server
 def get_files():
-    response = requests.get("http://localhost:5000/get-files")
+    response = requests.get(f"{API_URL}/get-files")
     if response.status_code == 200:
         return response.json()['data']
     else:
@@ -14,7 +17,7 @@ def get_files():
 
 # Hàm để bình chọn cho một file
 def vote_for_file(file_id):
-    response = requests.post("http://localhost:5000/vote", json={"id": file_id})
+    response = requests.post(f"{API_URL}/vote", json={"id": file_id})
     if response.status_code == 200:
         st.success("Bình chọn thành công!")
     else:
@@ -22,7 +25,7 @@ def vote_for_file(file_id):
 
 # Hàm để lấy số lượng bình chọn cho một file
 def get_votes(file_id):
-    response = requests.get(f"http://localhost:5000/get-votes?id={file_id}")
+    response = requests.get(f"{API_URL}/get-votes?id={file_id}")
     if response.status_code == 200:
         return response.json()['votes']
     else:
