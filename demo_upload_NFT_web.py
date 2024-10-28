@@ -35,15 +35,18 @@ if uploaded_file is not None:
                 firebase_url = firebase_response.json().get("url")
                 st.write("Firebase File URL:", firebase_url)
 
-                # Sau khi upload lên Firebase thành công, ta sẽ upload file thông tin lên server MongoDB
-                data = {
+                # Tạo form data để gửi lên MongoDB
+                form_data = {
                     'title': title,
                     'group': group,
                     'url': firebase_url
                 }
 
                 # Tạo yêu cầu POST tới server MongoDB
-                mongo_response = requests.post(f"{API_URL}/upload-files", json=data)
+                mongo_response = requests.post(
+                    f"{API_URL}/upload-files", 
+                    data=form_data  # Sử dụng data thay vì json
+                )
 
                 # Kiểm tra phản hồi từ server MongoDB
                 if mongo_response.status_code == 200:

@@ -84,10 +84,12 @@ def register_voter():
     data = request.json
     name = data.get('name')
     group = data.get('group')
+    role = data.get('role')  # Thêm trường role
     
     new_voter = {
         'name': name,
         'group': group,
+        'role': role,  # Lưu role vào MongoDB
         'number_of_votes': 0
     }
     result = voter_collection.insert_one(new_voter)
@@ -104,7 +106,9 @@ def vote_by_voter():
     if not voter:
         return jsonify({'status': 'error', 'message': 'Voter not found'}), 404
     
-    if voter['number_of_votes'] >= 5:
+    max_votes = 5 if voter['role'] == 'judge' else 2
+    
+    if voter['number_of_votes'] >= max_votes:
         return jsonify({'status': 'error', 'message': 'Maximum votes reached'}), 400
     
     # Tăng số lượt bình chọn của người dùng
@@ -126,6 +130,7 @@ def get_voter():
         'status': 'ok',
         'name': voter['name'],
         'group': voter['group'],
+        'role': voter['role'],  # Thêm role vào phản hồi
         'number_of_votes': voter['number_of_votes']
     })
 

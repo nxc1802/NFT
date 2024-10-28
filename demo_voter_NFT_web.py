@@ -6,8 +6,10 @@ from io import BytesIO
 # Cập nhật URL của API
 API_URL = "https://mantea-mongodbnft.hf.space"
 
-def register_voter(name, group):
-    response = requests.post(f"{API_URL}/register-voter", json={"name": name, "group": group})
+# Cập nhật hàm register_voter để thêm role
+def register_voter(name, group, role):  # Thêm tham số role
+    response = requests.post(f"{API_URL}/register-voter", 
+                           json={"name": name, "group": group, "role": role})  # Thêm role vào JSON
     if response.status_code == 200:
         return response.json()['id']
     else:
@@ -44,8 +46,9 @@ with st.sidebar:
     st.header("Đăng ký người bình chọn")
     name = st.text_input("Tên")
     group = st.text_input("Nhóm")
+    role = st.selectbox("Vai trò", ["contestant", "judge"])  # Thêm selectbox cho role
     if st.button("Đăng ký"):
-        voter_id = register_voter(name, group)
+        voter_id = register_voter(name, group, role)  # Thêm role vào hàm
         if voter_id:
             st.session_state['voter_id'] = voter_id
             st.success("Đăng ký thành công!")
@@ -56,7 +59,9 @@ if 'voter_id' in st.session_state:
     if voter_info:
         st.sidebar.write(f"Tên: {voter_info['name']}")
         st.sidebar.write(f"Nhóm: {voter_info['group']}")
-        st.sidebar.write(f"Số lượt bình chọn: {voter_info['number_of_votes']}/5")
+        st.sidebar.write(f"Vai trò: {voter_info['role']}")  # Thêm hiển thị role
+        max_votes = 5 if voter_info['role'] == 'judge' else 2
+        st.sidebar.write(f"Số lượt bình chọn: {voter_info['number_of_votes']}/{max_votes}")
 
 # Hiển thị danh sách file và nút bình chọn
 files = get_files()
