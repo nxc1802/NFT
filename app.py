@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 
 # Khởi tạo Flask app và cho phép CORS
 app = Flask(__name__)
-CORS(app)
+CORS('*')
 
 # MongoDB connection
 mongo_url = "mongodb+srv://ip6ofme:JL1S4hjMWRoko8AJ@cluster0.x0vo0.mongodb.net/"
@@ -14,6 +14,9 @@ db = client["test"]
 pdf_collection = db["PdfDetails"]
 voter_collection = db["Voters"]
 
+@app.route('/')
+def home():
+    return "Welcome to the IDEATHON API!"
 # API để upload file và lưu thông tin vào MongoDB
 @app.route('/upload-files', methods=['POST'])
 def upload_file():
